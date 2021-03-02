@@ -72,7 +72,7 @@ int main (int argc, char **argv)
     char* os_path = getenv("PATH");
     splitString(os_path, ':', os_path_list);
     int historyCount = 0;
-    char *inputCommand = new char[128];
+    std::string inputCommand;
     std::vector<std::string> command_list; // to store command user types in, split into its variour parameters
     char **command_list_exec = new char*[128]; // command_list converted to an array of character arrays
 
@@ -85,21 +85,41 @@ int main (int argc, char **argv)
             std::cout << "osshell> ";
             std::cin >> inputCommand;
         }
-        if (std::strcmp(inputCommand, "exit") == 0) {
+        else if (inputCommand == "exit") {
             break;
         }
-        //How to search paths? 
-        splitString(inputCommand, ' ', command_list);
+        else if (inputCommand == "history") {
+
+        }
+        else {
+            splitString(inputCommand, ' ', command_list);
+            bool fileFound = false;
+            for(int i = 0; i < os_path_list.size(); i++){
+                
+                std::string path = os_path_list[i] + "/" + command_list[0];
+                if (file exists){
+                    fileFound = true;
+                } 
+                //look for match to path executable
+                //Does /usr/bin/cat?
+            }
+            if (fileFound == false) {
+                std::cout << "<" << command_list[0] << ">:" << " Error command not found";
+            } else {
+                fork();
+                execv();
+            }
+
+        }
+        
         //vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
         //if(path == is valid) {
             //match command to thing in list
             /*if (match){
                 fork()
-                execv()
+                execv(usr/bin/cat)
             }*/
-            /*else if (inputCommand(isn't in our list')){
-            std::cout << '<' << inputCommand << '>:' << " Error command not found";
-            }*/
+            /*else */
         //}
 
         command_list_exec[historyCount] = inputCommand;
@@ -114,6 +134,10 @@ int main (int argc, char **argv)
     //   If yes, execute it
     //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
     return 0;
+}
+
+bool fileExist(std::string path) {
+    //Should only return true if it is executable.
 }
 
 /*
