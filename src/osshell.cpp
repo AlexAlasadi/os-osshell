@@ -5,12 +5,20 @@
 #include <sstream>
 #include <vector>
 #include <unistd.h>
+#include <fstream>
+#include <sys/stat.h>
+#include <filesystem>
+#include <sys/wait.h>
+
+namespace fs = std::filesystem;
 
 
 
 void splitString(std::string text, char d, std::vector<std::string>& result);
 void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char ***result);
 void freeArrayOfCharArrays(char **array, size_t array_length);
+bool fileExist(std::string path);
+
 
 int main (int argc, char **argv)
 {
@@ -71,59 +79,60 @@ int main (int argc, char **argv)
     std::vector<std::string> os_path_list;
     char* os_path = getenv("PATH");
     splitString(os_path, ':', os_path_list);
-    int historyCount = 0;
     std::string inputCommand;
     std::vector<std::string> command_list; // to store command user types in, split into its variour parameters
-    char **command_list_exec = new char*[128]; // command_list converted to an array of character arrays
+    char **command_list_exec; // command_list converted to an array of character arrays
+    std::vector<std::string> commands_history;
 
     // Welcome message
-    printf("%s\n","Welcome to OSShell! Please enter your commands ('exit' to quit).");
+    std::cout << "Welcome to OSShell! Please enter your commands ('exit' to quit)." << std::endl;
     while (true) {
         std::cout << "osshell> ";
-        std::cin >> inputCommand;
+        std::getline(std::cin,inputCommand);  
         if (inputCommand.empty()) {
-            std::cout << "osshell> ";
-            std::cin >> inputCommand;
+            
         }
         else if (inputCommand == "exit") {
             break;
         }
         else if (inputCommand == "history") {
-
+            for(int i = 0; i < commands_history.size(); i++) {
+                std:: cout << "  " << i << ": " << commands_history[i] << std::endl;
+            }
+            
         }
         else {
+
+            commands_history.push_back(inputCommand);
             splitString(inputCommand, ' ', command_list);
+            vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
+
+
             bool fileFound = false;
-            for(int i = 0; i < os_path_list.size(); i++){
-                
-                std::string path = os_path_list[i] + "/" + command_list[0];
-                if (file exists){
-                    fileFound = true;
-                } 
-                //look for match to path executable
-                //Does /usr/bin/cat?
+            std::string temp_path;
+            std::string dash = "/";
+            for(int i = 0; i < os_path_list.size() && fileFound == false; i++) {
+                temp_path = os_path_list[i] + dash + command_list[0];
+                fileFound = fileExist(temp_path);
             }
+
+            char* temp_string = new char[inputCommand.size()];
+            strcpy(temp_string, temp_path.c_str());
+
             if (fileFound == false) {
-                std::cout << "<" << command_list[0] << ">:" << " Error command not found";
+                std::cout << "<" << command_list[0] << ">:" << " Error command not found" << std::endl;
             } else {
-                fork();
-                execv();
+                pid_t pid = fork();
+                if(pid == 0){
+                    execv(temp_string, command_list_exec);
+                }
+                int sd;
+                waitpid(pid, &sd, 0);
             }
 
         }
         
-        //vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
-        //if(path == is valid) {
-            //match command to thing in list
-            /*if (match){
-                fork()
-                execv(usr/bin/cat)
-            }*/
-            /*else */
-        //}
-
-        command_list_exec[historyCount] = inputCommand;
-        historyCount++;
+        
     }
     // Repeat:
     //  Print prompt for user input: "osshell> " (no newline)
@@ -137,7 +146,11 @@ int main (int argc, char **argv)
 }
 
 bool fileExist(std::string path) {
-    //Should only return true if it is executable.
+    if (std::filesystem::exists(path) ){
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /*
