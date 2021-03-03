@@ -89,25 +89,37 @@ int main (int argc, char **argv)
     while (true) {
         std::cout << "osshell> ";
         std::getline(std::cin,inputCommand);  
+        splitString(inputCommand, ' ', command_list);
+        vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
         if (inputCommand.empty()) {
             
         }
         else if (inputCommand == "exit") {
             break;
         }
-        else if (inputCommand == "history") {
-            for(int i = 0; i < commands_history.size(); i++) {
-                std:: cout << "  " << i << ": " << commands_history[i] << std::endl;
-            }
-            
+        else if (command_list[0] == "history") {
+            if (command_list[1] == "clear") {
+                for(int i = 0; i < commands_history.size(); i++) {
+                    commands_history.clear();
+                }
+                command_list[1] = "";
+            } else if (atoi(command_list[1].c_str()) > 0){
+                int numberOfEntries = commands_history.size()-1;
+                int numberEntered = atoi(command_list[1].c_str());
+                int newNUMB = numberOfEntries - numberEntered;
+                for(int i = newNUMB; i < numberOfEntries; i++) {
+                    std:: cout << "  " << i << ": " << commands_history[i] << std::endl;
+                }
+                command_list[1] = "";
+            } else {
+                for(int i = 0; i < commands_history.size(); i++) {
+                    std:: cout << "  " << i << ": " << commands_history[i] << std::endl;
+                }
+            }     
         }
         else {
 
             commands_history.push_back(inputCommand);
-            splitString(inputCommand, ' ', command_list);
-            vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
-
-
             bool fileFound = false;
             std::string temp_path;
             std::string dash = "/";
@@ -118,7 +130,6 @@ int main (int argc, char **argv)
 
             char* temp_string = new char[inputCommand.size()];
             strcpy(temp_string, temp_path.c_str());
-
             if (fileFound == false) {
                 std::cout << "<" << command_list[0] << ">:" << " Error command not found" << std::endl;
             } else {
