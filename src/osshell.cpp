@@ -12,7 +12,7 @@
 
 namespace fs = std::filesystem;
 
-
+//test
 
 void splitString(std::string text, char d, std::vector<std::string>& result);
 void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char ***result);
