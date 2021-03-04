@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <sys/wait.h>
 
+
 namespace fs = std::filesystem;
 
 
@@ -38,11 +39,31 @@ int main (int argc, char **argv)
         std::getline(std::cin,inputCommand);  
         splitString(inputCommand, ' ', command_list);
         vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
-        
+        //file read code
+        std::string line;
+        int i = 0;
+        std::ifstream historyFile ("history.txt");
+        if (historyFile.is_open()) {
+            while (getline(historyFile,line)) {
+                commands_history[i] = line + '\n';
+                i++;
+            }
+            historyFile.close();
+        }
+        //end file read code
         if (inputCommand.empty()) {
             
         }
         else if (inputCommand == "exit") {
+            //file write code
+            std::ofstream historyFile ("history.txt");
+             if (historyFile.is_open()) {
+                for(int i = 0; i < commands_history.size(); i++) {
+                    historyFile << commands_history[i] + "\n";
+                }
+                historyFile.close();
+            }
+            //end file write code
             break;
         }
         else if (command_list[0] == "history") {
